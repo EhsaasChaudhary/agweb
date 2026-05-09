@@ -23,24 +23,27 @@ interface Particle {
   opacity: number;
 }
 
-function ParticleStream({ width = 120, height = 60 }: { width?: number; height?: number }) {
+function ParticleStream() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animationRef = useRef<number>(0);
   const { resolvedTheme } = useTheme();
+  
+  const streamWidth = 80;
+  const streamHeight = 80;
 
   const createParticle = useCallback((): Particle => {
     return {
       x: 0,
-      y: height / 2 + (Math.random() - 0.5) * 20,
-      vx: 1.5 + Math.random() * 2,
-      vy: (Math.random() - 0.5) * 0.8,
+      y: streamHeight / 2 + (Math.random() - 0.5) * 15,
+      vx: 1.2 + Math.random() * 1.5,
+      vy: (Math.random() - 0.5) * 0.5,
       life: 0,
-      maxLife: 60 + Math.random() * 40,
-      size: 1 + Math.random() * 2.5,
-      opacity: 0.6 + Math.random() * 0.4,
+      maxLife: 50 + Math.random() * 30,
+      size: 1.5 + Math.random() * 2,
+      opacity: 0.7 + Math.random() * 0.3,
     };
-  }, [height]);
+  }, [streamHeight]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,65 +52,106 @@ function ParticleStream({ width = 120, height = 60 }: { width?: number; height?:
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Initialize particles
-    for (let i = 0; i < 25; i++) {
+    // Initialize particles spread across the stream
+    for (let i = 0; i < 20; i++) {
       const p = createParticle();
-      p.x = Math.random() * width;
+      p.x = Math.random() * streamWidth;
       p.life = Math.random() * p.maxLife;
       particlesRef.current.push(p);
     }
 
     const animate = () => {
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, streamWidth, streamHeight);
 
       const isDark = resolvedTheme === "dark";
       const baseColor = isDark ? [255, 180, 100] : [200, 150, 80];
-      const glowColor = isDark ? [255, 200, 120] : [220, 170, 100];
+      const glowColor = isDark ? [255, 210, 140] : [230, 180, 110];
 
-      // Add new particles
-      if (particlesRef.current.length < 30 && Math.random() > 0.7) {
+      // Add new particles from left edge (nav bubble side)
+      if (particlesRef.current.length < 25 && Math.random() > 0.6) {
         particlesRef.current.push(createParticle());
       }
 
-      // Draw connecting glow line
-      const gradient = ctx.createLinearGradient(0, height / 2, width, height / 2);
-      gradient.addColorStop(0, `rgba(${glowColor.join(",")}, 0.3)`);
-      gradient.addColorStop(0.5, `rgba(${glowColor.join(",")}, 0.15)`);
-      gradient.addColorStop(1, `rgba(${glowColor.join(",")}, 0.3)`);
+      // Draw main energy stream line with glow
+      const lineGradient = ctx.createLinearGradient(0, streamHeight / 2, streamWidth, streamHeight / 2);
+      lineGradient.addColorStop(0, `rgba(${glowColor.join(",")}, 0.5)`);
+      lineGradient.addColorStop(0.3, `rgba(${glowColor.join(",")}, 0.25)`);
+      lineGradient.addColorStop(0.7, `rgba(${glowColor.join(",")}, 0.25)`);
+      lineGradient.addColorStop(1, `rgba(${glowColor.join(",")}, 0.5)`);
       
+      // Outer glow
       ctx.beginPath();
-      ctx.moveTo(0, height / 2);
-      ctx.lineTo(width, height / 2);
-      ctx.strokeStyle = gradient;
+      ctx.moveTo(0, streamHeight / 2);
+      ctx.lineTo(streamWidth, streamHeight / 2);
+      ctx.strokeStyle = `rgba(${glowColor.join(",")}, 0.15)`;
+      ctx.lineWidth = 12;
+      ctx.stroke();
+      
+      // Middle glow
+      ctx.beginPath();
+      ctx.moveTo(0, streamHeight / 2);
+      ctx.lineTo(streamWidth, streamHeight / 2);
+      ctx.strokeStyle = `rgba(${glowColor.join(",")}, 0.25)`;
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      
+      // Core line
+      ctx.beginPath();
+      ctx.moveTo(0, streamHeight / 2);
+      ctx.lineTo(streamWidth, streamHeight / 2);
+      ctx.strokeStyle = lineGradient;
       ctx.lineWidth = 2;
       ctx.stroke();
+
+      // Draw glowing endpoints where light touches bubbles
+      // Left endpoint (touching nav bubble)
+      const leftGlow = ctx.createRadialGradient(0, streamHeight / 2, 0, 0, streamHeight / 2, 15);
+      leftGlow.addColorStop(0, `rgba(${glowColor.join(",")}, 0.9)`);
+      leftGlow.addColorStop(0.3, `rgba(${glowColor.join(",")}, 0.5)`);
+      leftGlow.addColorStop(1, `rgba(${glowColor.join(",")}, 0)`);
+      ctx.beginPath();
+      ctx.arc(0, streamHeight / 2, 15, 0, Math.PI * 2);
+      ctx.fillStyle = leftGlow;
+      ctx.fill();
+
+      // Right endpoint (touching toggle bubble)
+      const rightGlow = ctx.createRadialGradient(streamWidth, streamHeight / 2, 0, streamWidth, streamHeight / 2, 15);
+      rightGlow.addColorStop(0, `rgba(${glowColor.join(",")}, 0.9)`);
+      rightGlow.addColorStop(0.3, `rgba(${glowColor.join(",")}, 0.5)`);
+      rightGlow.addColorStop(1, `rgba(${glowColor.join(",")}, 0)`);
+      ctx.beginPath();
+      ctx.arc(streamWidth, streamHeight / 2, 15, 0, Math.PI * 2);
+      ctx.fillStyle = rightGlow;
+      ctx.fill();
 
       // Update and draw particles
       particlesRef.current = particlesRef.current.filter((p) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += (Math.random() - 0.5) * 0.1;
+        p.vy += (Math.random() - 0.5) * 0.08;
+        // Keep particles near center line
+        p.vy += (streamHeight / 2 - p.y) * 0.02;
         p.life++;
 
         const lifeRatio = p.life / p.maxLife;
-        const fadeIn = Math.min(lifeRatio * 5, 1);
+        const fadeIn = Math.min(lifeRatio * 4, 1);
         const fadeOut = lifeRatio > 0.7 ? 1 - (lifeRatio - 0.7) / 0.3 : 1;
         const alpha = p.opacity * fadeIn * fadeOut;
 
-        if (p.x > width || p.life > p.maxLife) return false;
+        if (p.x > streamWidth || p.life > p.maxLife) return false;
 
-        // Draw particle glow
-        const glowGradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
-        glowGradient.addColorStop(0, `rgba(${glowColor.join(",")}, ${alpha * 0.8})`);
-        glowGradient.addColorStop(0.5, `rgba(${baseColor.join(",")}, ${alpha * 0.3})`);
+        // Draw particle outer glow
+        const glowGradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
+        glowGradient.addColorStop(0, `rgba(${glowColor.join(",")}, ${alpha * 0.9})`);
+        glowGradient.addColorStop(0.4, `rgba(${baseColor.join(",")}, ${alpha * 0.4})`);
         glowGradient.addColorStop(1, `rgba(${baseColor.join(",")}, 0)`);
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
         ctx.fillStyle = glowGradient;
         ctx.fill();
 
-        // Draw particle core
+        // Draw bright particle core
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
@@ -125,15 +169,15 @@ function ParticleStream({ width = 120, height = 60 }: { width?: number; height?:
       cancelAnimationFrame(animationRef.current);
       particlesRef.current = [];
     };
-  }, [width, height, createParticle, resolvedTheme]);
+  }, [streamWidth, streamHeight, createParticle, resolvedTheme]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={width}
-      height={height}
-      className="absolute top-1/2 -translate-y-1/2 pointer-events-none"
-      style={{ left: "-60px", width: `${width}px`, height: `${height}px` }}
+      width={streamWidth}
+      height={streamHeight}
+      className="pointer-events-none"
+      style={{ width: `${streamWidth}px`, height: `${streamHeight}px` }}
     />
   );
 }
@@ -310,11 +354,11 @@ export default function Header() {
         </defs>
       </svg>
 
-      <div className="container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-end gap-6">
+      <div className="flex justify-end px-6 py-6">
+        <nav className="flex items-center gap-0 pointer-events-auto">
           {/* Navigation bubble container with wobble effect */}
           <div
-            className="relative flex items-center gap-2 p-3 rounded-full pointer-events-auto
+            className="relative flex items-center gap-2 p-3 rounded-full
               bg-background/30 backdrop-blur-2xl
               border border-foreground/10
               shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-2px_4px_rgba(0,0,0,0.05)]"
@@ -329,13 +373,15 @@ export default function Header() {
             {navItems.map((item) => (
               <NavBubble key={item.href} href={item.href} label={item.label} />
             ))}
+          </div>
 
-            {/* Particle stream connecting to toggle */}
-            <ParticleStream width={120} height={60} />
+          {/* Particle stream connecting bubbles - positioned between them */}
+          <div className="relative flex items-center justify-center" style={{ marginLeft: '-10px', marginRight: '-10px', zIndex: 10 }}>
+            <ParticleStream />
           </div>
 
           {/* Theme toggle bubble */}
-          <div className="pointer-events-auto relative">
+          <div className="relative">
             <ThemeToggleBubble />
           </div>
         </nav>
