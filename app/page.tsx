@@ -114,8 +114,8 @@ export default function HomePage() {
         {/* Floating decorative element */}
         <div className="absolute right-10 bottom-20 hidden xl:block pointer-events-none">
           <div className="relative w-32 h-32">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-amber-500/20 rounded-3xl rotate-12 animate-pulse" />
-            <div className="absolute inset-4 bg-gradient-to-br from-orange-500/30 to-amber-500/30 rounded-2xl -rotate-6" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl rotate-12 animate-pulse" />
+            <div className="absolute inset-4 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-2xl -rotate-6" />
           </div>
         </div>
       </section>
@@ -154,19 +154,19 @@ export default function HomePage() {
           {/* Isometric blocks decoration */}
           <div className="mt-20 flex justify-center gap-8 opacity-80">
             <div className="relative w-24 h-24 transform rotate-12">
-              <div className="absolute inset-0 bg-orange-400 rounded-xl transform -skew-x-6" />
-              <div className="absolute -top-3 left-3 w-full h-6 bg-orange-300 rounded-t-xl transform skew-x-12" />
-              <div className="absolute top-0 -right-3 w-6 h-full bg-orange-500 rounded-r-xl transform -skew-y-12" />
+              <div className="absolute inset-0 bg-primary rounded-xl transform -skew-x-6" />
+              <div className="absolute -top-3 left-3 w-full h-6 bg-primary/70 rounded-t-xl transform skew-x-12" />
+              <div className="absolute top-0 -right-3 w-6 h-full bg-primary/90 rounded-r-xl transform -skew-y-12" />
             </div>
             <div className="relative w-24 h-24 transform -rotate-6">
-              <div className="absolute inset-0 bg-emerald-400 rounded-xl transform -skew-x-6" />
-              <div className="absolute -top-3 left-3 w-full h-6 bg-emerald-300 rounded-t-xl transform skew-x-12" />
-              <div className="absolute top-0 -right-3 w-6 h-full bg-emerald-500 rounded-r-xl transform -skew-y-12" />
+              <div className="absolute inset-0 bg-secondary rounded-xl transform -skew-x-6" />
+              <div className="absolute -top-3 left-3 w-full h-6 bg-secondary/70 rounded-t-xl transform skew-x-12" />
+              <div className="absolute top-0 -right-3 w-6 h-full bg-secondary/90 rounded-r-xl transform -skew-y-12" />
             </div>
             <div className="relative w-24 h-24 transform rotate-3 hidden sm:block">
-              <div className="absolute inset-0 bg-violet-400 rounded-xl transform -skew-x-6" />
-              <div className="absolute -top-3 left-3 w-full h-6 bg-violet-300 rounded-t-xl transform skew-x-12" />
-              <div className="absolute top-0 -right-3 w-6 h-full bg-violet-500 rounded-r-xl transform -skew-y-12" />
+              <div className="absolute inset-0 bg-muted rounded-xl transform -skew-x-6" />
+              <div className="absolute -top-3 left-3 w-full h-6 bg-muted/70 rounded-t-xl transform skew-x-12" />
+              <div className="absolute top-0 -right-3 w-6 h-full bg-muted/90 rounded-r-xl transform -skew-y-12" />
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function HomePage() {
                 key={service.title}
                 className="group p-8 rounded-2xl border border-background/10 hover:border-background/20 hover:bg-background/5 transition-all duration-300"
               >
-                <span className="text-5xl font-bold text-background/20 group-hover:text-orange-400 transition-colors">
+                <span className="text-5xl font-bold text-background/20 group-hover:text-primary transition-colors">
                   {service.icon}
                 </span>
                 <h3 className="text-2xl font-bold mt-4 mb-3">{service.title}</h3>
@@ -198,7 +198,7 @@ export default function HomePage() {
                 <div className="mt-6">
                   <Link
                     href="/services"
-                    className="inline-flex items-center gap-2 text-orange-400 font-medium hover:gap-3 transition-all"
+                    className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all"
                   >
                     Learn more <ArrowUpRight className="w-4 h-4" />
                   </Link>
@@ -242,7 +242,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <span className="text-sm text-foreground/50">{study.category}</span>
-                <h3 className="text-xl font-bold mt-1 group-hover:text-orange-500 transition-colors">{study.title}</h3>
+                <h3 className="text-xl font-bold mt-1 group-hover:text-primary transition-colors">{study.title}</h3>
                 <p className="text-foreground/70 mt-1">{study.client}</p>
               </Link>
             ))}
@@ -270,7 +270,7 @@ export default function HomePage() {
               >
                 <p className="text-lg mb-6 text-pretty">{`"${testimonial.quote}"`}</p>
                 <div>
-                  <p className="font-medium text-orange-400">{testimonial.author}</p>
+                  <p className="font-medium text-primary">{testimonial.author}</p>
                   <p className="text-background/60 text-sm">{testimonial.company}</p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors shadow-[0_4px_20px_rgba(251,146,60,0.3)]"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors shadow-lg"
             >
               Start a project
               <ArrowUpRight className="w-5 h-5" />
@@ -314,11 +314,11 @@ export default function HomePage() {
             <div>
               <h4 className="text-sm font-medium text-foreground/50 mb-4">Chat to us</h4>
               <div className="space-y-3">
-                <a href="tel:+1234567890" className="flex items-center gap-2 text-foreground hover:text-orange-500 transition-colors">
+                <a href="tel:+1234567890" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                   <Phone className="w-4 h-4" />
                   +1 (234) 567-890
                 </a>
-                <a href="mailto:hello@agency.com" className="flex items-center gap-2 text-foreground hover:text-orange-500 transition-colors">
+                <a href="mailto:hello@agency.com" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                   <Mail className="w-4 h-4" />
                   hello@agency.com
                 </a>
@@ -346,7 +346,7 @@ export default function HomePage() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-foreground hover:text-orange-500 transition-colors"
+                      className="text-foreground hover:text-primary transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -359,7 +359,7 @@ export default function HomePage() {
             <div className="flex md:justify-end">
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="w-14 h-14 rounded-xl border border-orange-500 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
+                className="w-14 h-14 rounded-xl border border-primary text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                 aria-label="Back to top"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
