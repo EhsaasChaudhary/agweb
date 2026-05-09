@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const navItems = [
   { href: "/work", label: "Work" },
@@ -10,27 +10,6 @@ const navItems = [
   { href: "/about", label: "About" },
   { href: "/insights", label: "Insights" },
 ];
-
-function LightConnector() {
-  return (
-    <div className="relative w-16 h-8 flex items-center">
-      <div className="absolute inset-y-0 left-0 right-0 flex items-center">
-        <div className="absolute h-2 w-full bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 blur-md animate-pulse-glow" />
-        <div className="absolute h-1 w-full bg-gradient-to-r from-primary/60 via-primary/30 to-primary/60 blur-sm" />
-        <div className="absolute h-0.5 w-full bg-gradient-to-r from-primary/80 via-primary/50 to-primary/80" />
-        <div className="absolute h-1.5 w-6 bg-gradient-to-r from-transparent via-white/80 to-transparent blur-sm animate-light-travel" />
-      </div>
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2">
-        <div className="w-3 h-3 rounded-full bg-primary/60 blur-md animate-pulse-dot" />
-        <div className="absolute inset-0 w-1.5 h-1.5 m-auto rounded-full bg-primary/90" />
-      </div>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2">
-        <div className="w-3 h-3 rounded-full bg-primary/60 blur-md animate-pulse-dot-delayed" />
-        <div className="absolute inset-0 w-1.5 h-1.5 m-auto rounded-full bg-primary/90" />
-      </div>
-    </div>
-  );
-}
 
 function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
@@ -44,46 +23,94 @@ function ThemeToggle() {
 
   const isDark = resolvedTheme === "dark";
 
-  const triggerRipple = useCallback((targetTheme: "light" | "dark") => {
-    if (!toggleRef.current || isAnimating) return;
-
-    setIsAnimating(true);
-
+  const toggleTheme = () => {
+    if (isAnimating || !toggleRef.current) return;
+    
+    const targetTheme = isDark ? "light" : "dark";
     const rect = toggleRef.current.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
+    
+    setIsAnimating(true);
 
-    // Create overlay
+    // Create the pattern overlay
     const overlay = document.createElement("div");
-    overlay.className = "theme-transition-overlay";
+    overlay.className = "theme-pattern-overlay";
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      overflow: hidden;
+    `;
+
+    // Create the expanding container with squares pattern
+    const container = document.createElement("div");
+    container.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%);
+    `;
+
+    // Create multiple layers of inverted squares with inward curved sides
+    const layers = 12;
+    for (let i = 0; i < layers; i++) {
+      const square = document.createElement("div");
+      const size = 300 + i * 50;
+      const delay = i * 0.03;
+      const blur = Math.min(i * 0.8, 6);
+      
+      square.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: ${size}vmax;
+        height: ${size}vmax;
+        transform: translate(-50%, -50%) scale(0) rotate(${i * 5}deg);
+        background: ${targetTheme === "dark" 
+          ? "oklch(0.2730 0.0093 53.0916)" 
+          : "oklch(0.9480 0.0094 99.9875)"};
+        border-radius: 30% 30% 30% 30% / 30% 30% 30% 30%;
+        filter: blur(${blur}px);
+        opacity: ${1 - i * 0.06};
+        animation: squareExpand 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s forwards;
+      `;
+      container.appendChild(square);
+    }
+
+    overlay.appendChild(container);
     document.body.appendChild(overlay);
 
-    // Create ripple
-    const ripple = document.createElement("div");
-    ripple.className = "theme-ripple";
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-    ripple.style.backgroundColor = targetTheme === "dark" 
-      ? "oklch(0.2730 0.0093 53.0916)" 
-      : "oklch(0.9480 0.0094 99.9875)";
-    overlay.appendChild(ripple);
+    // Add the animation keyframes if not already present
+    if (!document.getElementById("theme-square-animation")) {
+      const style = document.createElement("style");
+      style.id = "theme-square-animation";
+      style.textContent = `
+        @keyframes squareExpand {
+          0% {
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1) rotate(45deg);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
-    // Change theme partway through animation
+    // Change theme slightly before animation completes for seamless transition
     setTimeout(() => {
       setTheme(targetTheme);
-    }, 300);
+    }, 150);
 
-    // Cleanup after animation
+    // Clean up
     setTimeout(() => {
       overlay.remove();
       setIsAnimating(false);
-    }, 800);
-  }, [setTheme, isAnimating]);
-
-  const toggleTheme = () => {
-    if (isAnimating) return;
-    const targetTheme = isDark ? "light" : "dark";
-    triggerRipple(targetTheme);
+    }, 700);
   };
 
   if (!mounted) {
@@ -200,15 +227,10 @@ export default function Header() {
             ))}
           </div>
 
-          {/* Light Connector */}
-          <div className="hidden lg:flex items-center -mx-1">
-            <LightConnector />
-          </div>
-
           {/* Contact Button */}
           <Link
             href="/contact"
-            className="px-5 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-full transition-all duration-200 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+            className="ml-2 px-5 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-full transition-all duration-200 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
           >
             Contact
           </Link>
